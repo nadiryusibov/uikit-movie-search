@@ -4,5 +4,6 @@ struct Movie{
     let title : String
     let year : String
     let posterURL : URL?
+//    let user:String
 }
 
