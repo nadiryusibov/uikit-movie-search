@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# SwiftPM
+.build/
+
+# CocoaPods (istifadə edirsənsə)
+Pods/
+
+# CoreML compiled
+*.mlmodelc/
+
+# Secrets
+APIKeys.swift
+*.xcconfig
