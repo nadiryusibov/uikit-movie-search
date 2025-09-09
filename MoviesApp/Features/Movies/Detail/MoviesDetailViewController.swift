@@ -8,7 +8,7 @@
 import UIKit
 
 class MoviesDetailViewController: UIViewController {
-    
+    private var posterTask: Task<Void, Never>?
     private let movie: Movie
     private var isLoadingPlot = false
 
@@ -121,6 +121,7 @@ class MoviesDetailViewController: UIViewController {
         bindData()
         favButton.addTarget(self, action: #selector(favTapped), for: .touchUpInside)
         loadPlot()
+        loadPosterIfNeeded()
     }
     
     
@@ -209,5 +210,30 @@ class MoviesDetailViewController: UIViewController {
         }
     }
     
+    
+    private func loadPosterIfNeeded() {
+        // 1) Search nəticəsi ilə gələn URL varsa ondan istifadə et
+        if let url = movie.posterURL {
+            posterTask?.cancel()
+            posterTask = Task { [weak self] in
+                guard let self else { return }
+                if let img = try? await ImageLoader.shared.image(from: url) {
+                    await MainActor.run { self.posterView.image = img }
+                }
+            }
+            return
+        }
+        // 2) Yoxdursa, detal endpoint-dən poster URL götür
+        posterTask?.cancel()
+        posterTask = Task { [weak self] in
+            guard let self else { return }
+            if let url = try? await APIClient.shared.fetchPosterURL(imdbID: movie.id),
+               let img = try? await ImageLoader.shared.image(from: url) {
+                await MainActor.run { self.posterView.image = img }
+            }
+        }
+    }
+
+    deinit { posterTask?.cancel() }
 
 }

@@ -31,6 +31,7 @@ private struct OmdbDetail: Decodable {
     let Error: String?
 }
 
+
 final class APIClient {
     static let shared = APIClient()
     private init() {}
@@ -66,6 +67,16 @@ final class APIClient {
         guard res.Response.lowercased() == "true", let items = res.Search,!items.isEmpty else {
             throw APIError.server(res.Error ?? "No results")
         }
+        
+//        print(" OMDb search '\(query)' → \(items.count) item")
+//        let na = items.filter { $0.Poster.uppercased() == "N/A" }.count
+//        print(" posters: \(na) N/A, \(items.count - na) URL")
+//
+//        for i in items.prefix(3) {
+//            print("  sample:", i.Title, "| Poster:", i.Poster)
+//        }
+
+        
         return items.map{
             Movie(
                 id: $0.imdbID,
@@ -87,4 +98,17 @@ final class APIClient {
         }
         return detail.Plot
     }
+    
+    
+    func fetchPosterURL(imdbID: String) async throws -> URL? {
+        struct D: Decodable { let Poster: String; let Response: String; let Error: String? }
+        let d: D = try await get(
+            [URLQueryItem(name: "i", value: imdbID)],
+            as: D.self
+        )
+        guard d.Response.lowercased() == "true", d.Poster.uppercased() != "N/A" else { return nil }
+        return URL(string: d.Poster)
+    }
+
+
 }

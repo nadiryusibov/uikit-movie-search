@@ -89,29 +89,20 @@ final class MovieCell: UITableViewCell {
         yearLabel.text = nil
     }
     
-    func configure (with movie: Movie) {
-        titleLabel.text = movie.title
-        yearLabel.text = movie.year
-    }
     
-    func confugure(with movie: Movie){
+    func configure(with movie: Movie) {
         titleLabel.text = movie.title
         yearLabel.text = movie.year
         
         imageTask?.cancel()
-        posterView.image = UIImage(systemName: "photo")
-        guard let url = movie.posterURL else{
-            return
-        }
+        posterView.image = UIImage(systemName: "film")
         
-        imageTask = Task{[weak self] in
-            guard let self else{
-                return
-            }
+        guard let url = movie.posterURL else { return }
+        
+        imageTask = Task { [weak self] in
+            guard let self else { return }
             if let image = try? await ImageLoader.shared.image(from: url) {
-                // UI dəyişiklikləri MainActor-da
                 await MainActor.run {
-                    // Reuse zamanı cell artıq başqa data ola bilər — sadəcə göstər
                     self.posterView.image = image
                 }
             }
